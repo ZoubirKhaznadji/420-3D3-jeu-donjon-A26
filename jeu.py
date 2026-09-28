@@ -1,4 +1,8 @@
-from ennemi import Ennemi
+from models.ennemi import Ennemi
+from models.comportements.comportement_agressif import ComportementAgressif
+from models.comportements.comportement_defensif import ComportementDefensif
+from models.comportements.comportement_aleatoire import ComportementAleatoire
+from models.comportements.comportement_furtif import ComportementFurtif
 
 class Jeu:
     def __init__(self):
@@ -7,9 +11,10 @@ class Jeu:
         self.heros_attaque = 20
 
         self.ennemis = [
-            Ennemi("Goblin", 50, 10, "agressif"),
-            Ennemi("Dragon", 100, 20, "defensif"),
-            Ennemi("Voleur", 30, 15, "furtif"),
+            Ennemi("Goblin", 50, 10, ComportementAgressif()),
+            Ennemi("Dragon", 100, 20, ComportementDefensif()),
+            Ennemi("Voleur", 30, 15, ComportementFurtif()),
+            Ennemi("Spectre", 40, 10, ComportementAleatoire())
         ]
 
     def ennemis_vivants(self):
@@ -28,7 +33,8 @@ class Jeu:
             print("\nEnnemis :")
             vivants = self.ennemis_vivants()
             for i, ennemi in enumerate(vivants, 1):
-                print(f"  [{i}] {ennemi.nom} (HP: {ennemi.hp}/{ennemi.hp_max}) — {ennemi.comportement}")
+                print(f"[{i}] {ennemi.nom} (HP: {ennemi.hp}/{ennemi.hp_max}) — {type(ennemi.get_comportement).__name__}")
+        
             print()
 
             # Demander l'action du héros
@@ -87,8 +93,8 @@ class Jeu:
 
             # Adaptation des comportements
             for ennemi in self.ennemis_vivants():
-                if ennemi.hp < ennemi.hp_max * 0.3 and ennemi.comportement != "defensif":
-                    ennemi.comportement = "defensif"
+                if ennemi.hp < ennemi.hp_max * 0.3 and type(ennemi.get_comportement)!=ComportementDefensif:
+                    ennemi.comportement = set.comportement(ComportementDefensif())
                     print(f"  ⚡ {ennemi.nom} change de tactique — il devient Défensif !")
 
             print()
