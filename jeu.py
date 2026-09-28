@@ -94,7 +94,7 @@ class Jeu:
             # Adaptation des comportements
             for ennemi in self.ennemis_vivants():
                 if ennemi.hp < ennemi.hp_max * 0.3 and type(ennemi.get_comportement)!=ComportementDefensif:
-                    ennemi.comportement = set.comportement(ComportementDefensif())
+                    ennemi.set_comportement(ComportementDefensif())
                     print(f"  ⚡ {ennemi.nom} change de tactique — il devient Défensif !")
 
             print()
