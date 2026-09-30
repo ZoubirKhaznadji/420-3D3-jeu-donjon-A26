@@ -3,19 +3,27 @@ from models.comportements.comportement_agressif import ComportementAgressif
 from models.comportements.comportement_defensif import ComportementDefensif
 from models.comportements.comportement_aleatoire import ComportementAleatoire
 from models.comportements.comportement_furtif import ComportementFurtif
+from models.comportements.comportement_berserker import ComportementBerserker
+from models.regles_adaptation import devenir_defensif_si_faible, devenir_agressif_si_fort
+
 
 class Jeu:
     def __init__(self):
         self.heros_hp = 100
         self.heros_hp_max = 100
         self.heros_attaque = 20
+        
 
         self.ennemis = [
             Ennemi("Goblin", 50, 10, ComportementAgressif()),
-            Ennemi("Dragon", 100, 20, ComportementDefensif()),
+            Ennemi("Dragon", hp=100, attaque=12,
+                comportement=ComportementAgressif(),
+                regles_adaptation=[devenir_defensif_si_faible, devenir_agressif_si_fort]),
             Ennemi("Voleur", 30, 15, ComportementFurtif()),
-            Ennemi("Spectre", 40, 10, ComportementAleatoire())
+            Ennemi("Spectre", 40, 10, ComportementAleatoire()),
+            Ennemi("Troll", 150, 20, ComportementBerserker())
         ]
+
 
     def ennemis_vivants(self):
         return [e for e in self.ennemis if e.est_vivant()]
@@ -77,19 +85,12 @@ class Jeu:
                 cible.recevoir_degats(degats)
 
             # Résoudre les actions des ennemis
-            for ennemi, action_ennemi in actions_ennemis.items():
+            for ennemi in self.ennemis:
                 if not ennemi.est_vivant():
                     continue
-                if action_ennemi == "attaque":
-                    if action_heros == "defend":
-                        degats = ennemi.attaque // 2
-                        print(f"  → {ennemi.nom} attaque — vous vous défendez ! Seulement {degats} dégâts reçus.")
-                    else:
-                        degats = ennemi.attaque
-                        print(f"  → {ennemi.nom} vous attaque pour {degats} dégâts !")
-                    self.heros_hp = max(0, self.heros_hp - degats)
-                else:
-                    print(f"  → {ennemi.nom} se défend.")
+                action = ennemi.agir()                                          # ← un objet Action
+                self.heros_hp, msg = action.appliquer(ennemi, self.heros_hp, action_heros)
+                print(msg)
 
             # Adaptation des comportements
             for ennemi in self.ennemis_vivants():
